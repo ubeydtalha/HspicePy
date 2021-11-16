@@ -102,13 +102,6 @@ class HSpicePy(object):
         """
         return self.__operation_point_result
 
-    # @result.setter
-    # def result(self,value):
-    #     self.__result = value
-    
-    # @result.deleter
-    # def result(self):
-    #     self.__result = None
     def __get_dp0_log(self):
         
         dp0_log = {}
