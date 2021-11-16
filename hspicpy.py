@@ -49,7 +49,7 @@ class HSpicePy(object):
         self.parameters = None
         self.instructions = []
         self.save_output = save_output
-
+        self.__mt0_result = None
         self.__result = None
         self.__operation_point_result = None
     
@@ -101,7 +101,22 @@ class HSpicePy(object):
         Returns the result of the simulation.
         """
         return self.__operation_point_result
+    
+    @property
+    def mt0_result(self):
+        """
+        Returns the result of the simulation.
+        """
+        return self.__mt0_result
 
+
+    # @result.setter
+    # def result(self,value):
+    #     self.__result = value
+    
+    # @result.deleter
+    # def result(self):
+    #     self.__result = None
     def __get_dp0_log(self):
         
         dp0_log = {}
@@ -126,7 +141,7 @@ class HSpicePy(object):
 
                 if new_table:
                     if table_line_number == 0:
-                        params = list(filter(None, line.split("|")))
+                        params = list(map(lambda x : x.strip(), list(filter(None, line.split("|")))))
                         
                         tables_[params[0]] = {key.strip() :{} for key in params[1:]}
                         
@@ -165,7 +180,25 @@ class HSpicePy(object):
                 json.dump(res, outfile)
         self.__result = res
 
-
+    def __get_mt0_log(self):
+        """
+        TR
+        -
+        Simülasyon oluşturulduktan sonra oluşan .mt0 dosyasını okur ve çıktıları kaydeder.
+        
+        """
+        file_name = self.file_name + ".mt0"
+        with open(f"{self.path}\\out\\{file_name}","r") as mt0:
+            # data = ma0.read()
+            
+            lines =  mt0.readlines()
+        variables = lines[-2]
+        results = lines[-1]
+        res = {variable:result for variable,result in zip(variables.split(),results.split())}
+        if self.save_output:
+            with open(f"{self.path}\\out\\{file_name[:-3]}_mt0.json","w") as outfile:
+                json.dump(res, outfile)
+        self.__mt0_result = res
 
     @timeit
     def run(self):
@@ -177,6 +210,7 @@ class HSpicePy(object):
 
             self.__get_ma0_log()
             self.__get_dp0_log()
+            self.__get_mt0_log()
         except Exception as e:
             print(e)
             pass
